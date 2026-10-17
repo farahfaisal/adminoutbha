@@ -1,0 +1,18 @@
+{
+  "name": "لوحة تحكم اطلبها",
+  "short_name": "اطلبها",
+  "description": "لوحة التحكم لإدارة تطبيق اطلبها",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#dc2626",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="#dc2626"/>
+  <text x="256" y="340" font-family="Arial, sans-serif" font-size="280" font-weight="bold" fill="white" text-anchor="middle">ا</text>
+  <path d="M160 200h192l-20 100H180z" fill="none" stroke="white" stroke-width="12" stroke-linejoin="round"/>
+  <circle cx="196" cy="370" r="22" fill="white"/>
+  <circle cx="316" cy="370" r="22" fill="white"/>
+  <path d="M152 200h-16l-12-40h-24" fill="none" stroke="white" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

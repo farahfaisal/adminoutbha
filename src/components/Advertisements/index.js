@@ -1,0 +1,1 @@
+export { default as VendorCategoryAdvertisement } from './VendorCategoryAdvertisement';

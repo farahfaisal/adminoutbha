@@ -1,0 +1,495 @@
+{
+  "examples": [
+    {
+      "scenario": "مطعم وجبات سريعة - برجر",
+      "product": {
+        "name": "برجر لحم كلاسيك",
+        "base_price": 28,
+        "description": "برجر لحم بقري مشوي مع الخضار الطازجة"
+      },
+      "addons": [
+        {
+          "name": "جبنة شيدر",
+          "price": 4,
+          "is_default": false,
+          "is_required": false,
+          "type": "regular",
+          "image_url": null
+        },
+        {
+          "name": "بصل مقلي",
+          "price": 2,
+          "is_default": false,
+          "is_required": false,
+          "type": "regular"
+        },
+        {
+          "name": "مخلل",
+          "price": 0,
+          "is_default": true,
+          "is_required": false,
+          "type": "regular"
+        },
+        {
+          "name": "صوص ثوم",
+          "price": 1.5,
+          "is_default": false,
+          "is_required": false,
+          "type": "sauce"
+        }
+      ],
+      "customer_order_example": {
+        "selected_addons": ["جبنة شيدر", "مخلل", "صوص ثوم"],
+        "calculation": "28 (base) + 4 (جبنة) + 0 (مخلل) + 1.5 (صوص) = 33.5 ₪"
+      }
+    },
+
+    {
+      "scenario": "مقهى - قهوة بأحجام",
+      "product": {
+        "name": "كابتشينو",
+        "base_price": 0,
+        "description": "قهوة إيطالية كريمية"
+      },
+      "addons": [
+        {
+          "name": "حجم صغير 8oz",
+          "price": 12,
+          "is_default": true,
+          "is_required": true,
+          "type": "size",
+          "note": "المكون الافتراضي - يجب اختيار حجم"
+        },
+        {
+          "name": "حجم وسط 12oz",
+          "price": 16,
+          "is_default": false,
+          "is_required": true,
+          "type": "size"
+        },
+        {
+          "name": "حجم كبير 16oz",
+          "price": 20,
+          "is_default": false,
+          "is_required": true,
+          "type": "size"
+        },
+        {
+          "name": "شوت إسبريسو إضافي",
+          "price": 4,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        },
+        {
+          "name": "حليب خالي الدسم",
+          "price": 0,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        },
+        {
+          "name": "كريمة",
+          "price": 3,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        }
+      ],
+      "customer_order_example": {
+        "selected_addons": ["حجم كبير 16oz", "شوت إسبريسو إضافي"],
+        "calculation": "0 (base) + 20 (حجم كبير) + 4 (شوت إضافي) = 24 ₪"
+      }
+    },
+
+    {
+      "scenario": "محل بيتزا - خيارات متعددة",
+      "product": {
+        "name": "بيتزا مارجريتا",
+        "base_price": 0,
+        "description": "بيتزا إيطالية كلاسيكية"
+      },
+      "addons": [
+        {
+          "name": "حجم صغير 6 قطع",
+          "price": 25,
+          "is_default": false,
+          "is_required": true,
+          "type": "size",
+          "category": "الحجم"
+        },
+        {
+          "name": "حجم وسط 8 قطع",
+          "price": 35,
+          "is_default": true,
+          "is_required": true,
+          "type": "size",
+          "category": "الحجم"
+        },
+        {
+          "name": "حجم كبير 12 قطعة",
+          "price": 50,
+          "is_default": false,
+          "is_required": true,
+          "type": "size",
+          "category": "الحجم"
+        },
+        {
+          "name": "عجينة عادية",
+          "price": 0,
+          "is_default": true,
+          "is_required": true,
+          "type": "dough",
+          "category": "نوع العجينة"
+        },
+        {
+          "name": "عجينة رقيقة",
+          "price": 2,
+          "is_default": false,
+          "is_required": true,
+          "type": "dough",
+          "category": "نوع العجينة"
+        },
+        {
+          "name": "عجينة سميكة",
+          "price": 3,
+          "is_default": false,
+          "is_required": true,
+          "type": "dough",
+          "category": "نوع العجينة"
+        },
+        {
+          "name": "زيتون أسود",
+          "price": 3,
+          "is_default": false,
+          "is_required": false,
+          "type": "topping",
+          "category": "إضافات"
+        },
+        {
+          "name": "فطر طازج",
+          "price": 4,
+          "is_default": false,
+          "is_required": false,
+          "type": "topping",
+          "category": "إضافات"
+        },
+        {
+          "name": "جبن موزاريلا إضافي",
+          "price": 5,
+          "is_default": false,
+          "is_required": false,
+          "type": "topping",
+          "category": "إضافات"
+        }
+      ],
+      "customer_order_example": {
+        "selected_addons": [
+          "حجم وسط 8 قطع",
+          "عجينة عادية",
+          "زيتون أسود",
+          "جبن موزاريلا إضافي"
+        ],
+        "calculation": "0 (base) + 35 (حجم وسط) + 0 (عجينة عادية) + 3 (زيتون) + 5 (جبن) = 43 ₪"
+      }
+    },
+
+    {
+      "scenario": "محل عصائر - مشروبات صحية",
+      "product": {
+        "name": "سموذي فراولة",
+        "base_price": 0,
+        "description": "سموذي طبيعي بالفراولة الطازجة"
+      },
+      "addons": [
+        {
+          "name": "صغير 250ml",
+          "price": 10,
+          "is_default": true,
+          "is_required": true,
+          "type": "size"
+        },
+        {
+          "name": "وسط 400ml",
+          "price": 15,
+          "is_default": false,
+          "is_required": true,
+          "type": "size"
+        },
+        {
+          "name": "كبير 600ml",
+          "price": 20,
+          "is_default": false,
+          "is_required": true,
+          "type": "size"
+        },
+        {
+          "name": "حليب كامل الدسم",
+          "price": 0,
+          "is_default": true,
+          "is_required": false,
+          "type": "base"
+        },
+        {
+          "name": "حليب لوز",
+          "price": 3,
+          "is_default": false,
+          "is_required": false,
+          "type": "base"
+        },
+        {
+          "name": "عسل طبيعي",
+          "price": 2,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        },
+        {
+          "name": "بروتين",
+          "price": 5,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        },
+        {
+          "name": "آيس كريم فانيليا",
+          "price": 6,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        }
+      ],
+      "customer_order_example": {
+        "selected_addons": [
+          "وسط 400ml",
+          "حليب لوز",
+          "عسل طبيعي",
+          "بروتين"
+        ],
+        "calculation": "0 (base) + 15 (وسط) + 3 (حليب لوز) + 2 (عسل) + 5 (بروتين) = 25 ₪"
+      }
+    },
+
+    {
+      "scenario": "مطعم - وجبة كومبو",
+      "product": {
+        "name": "وجبة كومبو دجاج",
+        "base_price": 35,
+        "description": "وجبة كاملة مع دجاج مشوي"
+      },
+      "addons": [
+        {
+          "name": "بطاطس صغيرة",
+          "price": 5,
+          "is_default": true,
+          "is_required": false,
+          "type": "side",
+          "note": "تأتي مع الوجبة افتراضياً"
+        },
+        {
+          "name": "مشروب غازي 250ml",
+          "price": 3,
+          "is_default": true,
+          "is_required": false,
+          "type": "drink",
+          "note": "تأتي مع الوجبة افتراضياً"
+        },
+        {
+          "name": "ترقية لبطاطس كبيرة",
+          "price": 3,
+          "is_default": false,
+          "is_required": false,
+          "type": "upgrade"
+        },
+        {
+          "name": "ترقية لمشروب كبير",
+          "price": 2,
+          "is_default": false,
+          "is_required": false,
+          "type": "upgrade"
+        },
+        {
+          "name": "سلطة",
+          "price": 7,
+          "is_default": false,
+          "is_required": false,
+          "type": "side"
+        }
+      ],
+      "customer_order_example_1": {
+        "scenario": "وجبة عادية مع الإضافات الافتراضية",
+        "selected_addons": ["بطاطس صغيرة", "مشروب غازي 250ml"],
+        "calculation": "35 (base) + 5 (بطاطس) + 3 (مشروب) = 43 ₪"
+      },
+      "customer_order_example_2": {
+        "scenario": "وجبة مخصصة",
+        "selected_addons": [
+          "بطاطس صغيرة",
+          "ترقية لبطاطس كبيرة",
+          "سلطة"
+        ],
+        "removed_addons": ["مشروب غازي 250ml"],
+        "calculation": "35 (base) + 5 (بطاطس) + 3 (ترقية) + 7 (سلطة) = 50 ₪"
+      }
+    },
+
+    {
+      "scenario": "محل حلويات - كيك بالطلب",
+      "product": {
+        "name": "كيك شوكولاتة",
+        "base_price": 80,
+        "description": "كيك شوكولاتة فاخر"
+      },
+      "addons": [
+        {
+          "name": "كريمة فانيليا",
+          "price": 10,
+          "is_default": false,
+          "is_required": false,
+          "type": "topping",
+          "image_url": "https://storage.supabase.co/addons/vanilla-cream.jpg"
+        },
+        {
+          "name": "فراولة طازجة",
+          "price": 15,
+          "is_default": false,
+          "is_required": false,
+          "type": "topping",
+          "image_url": "https://storage.supabase.co/addons/strawberry.jpg"
+        },
+        {
+          "name": "صوص الشوكولاتة",
+          "price": 8,
+          "is_default": false,
+          "is_required": false,
+          "type": "topping",
+          "image_url": "https://storage.supabase.co/addons/chocolate-sauce.jpg"
+        },
+        {
+          "name": "لوز مقطع",
+          "price": 12,
+          "is_default": false,
+          "is_required": false,
+          "type": "topping",
+          "image_url": "https://storage.supabase.co/addons/almonds.jpg"
+        },
+        {
+          "name": "شمعة عيد ميلاد",
+          "price": 5,
+          "is_default": false,
+          "is_required": false,
+          "type": "extra"
+        },
+        {
+          "name": "بطاقة تهنئة",
+          "price": 3,
+          "is_default": false,
+          "is_required": false,
+          "type": "extra"
+        }
+      ],
+      "customer_order_example": {
+        "selected_addons": [
+          "كريمة فانيليا",
+          "فراولة طازجة",
+          "شمعة عيد ميلاد",
+          "بطاقة تهنئة"
+        ],
+        "calculation": "80 (base) + 10 (كريمة) + 15 (فراولة) + 5 (شمعة) + 3 (بطاقة) = 113 ₪"
+      }
+    },
+
+    {
+      "scenario": "مطعم شاورما",
+      "product": {
+        "name": "شاورما دجاج",
+        "base_price": 15,
+        "description": "شاورما دجاج طازجة"
+      },
+      "addons": [
+        {
+          "name": "صغير",
+          "price": 0,
+          "is_default": true,
+          "is_required": true,
+          "type": "size"
+        },
+        {
+          "name": "وسط",
+          "price": 5,
+          "is_default": false,
+          "is_required": true,
+          "type": "size"
+        },
+        {
+          "name": "كبير",
+          "price": 10,
+          "is_default": false,
+          "is_required": true,
+          "type": "size"
+        },
+        {
+          "name": "خبز عربي",
+          "price": 0,
+          "is_default": true,
+          "is_required": true,
+          "type": "bread"
+        },
+        {
+          "name": "خبز تورتيلا",
+          "price": 1,
+          "is_default": false,
+          "is_required": true,
+          "type": "bread"
+        },
+        {
+          "name": "ثوم إضافي",
+          "price": 0,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        },
+        {
+          "name": "مخلل حار",
+          "price": 0,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        },
+        {
+          "name": "بطاطس داخل الشاورما",
+          "price": 2,
+          "is_default": false,
+          "is_required": false,
+          "type": "addon"
+        }
+      ],
+      "customer_order_example": {
+        "selected_addons": [
+          "وسط",
+          "خبز عربي",
+          "ثوم إضافي",
+          "بطاطس داخل الشاورما"
+        ],
+        "calculation": "15 (base) + 5 (وسط) + 0 (خبز عربي) + 0 (ثوم) + 2 (بطاطس) = 22 ₪"
+      }
+    }
+  ],
+
+  "notes": {
+    "is_required_true": "المكونات الإلزامية - يجب اختيار واحد منها على الأقل (مثل الأحجام)",
+    "is_required_false": "الإضافات الاختيارية - يمكن اختيارها أو تجاهلها",
+    "is_default_true": "محدد مسبقاً - يأتي مع الطلب افتراضياً ويمكن إزالته",
+    "price_zero": "يمكن أن يكون السعر صفر (مجاني) للخيارات الأساسية",
+    "base_price_zero": "عندما يكون السعر الأساسي صفر، السعر يأتي من المكونات الإلزامية",
+    "image_url": "اختياري - يُستخدم لتوضيح الإضافة بصرياً"
+  },
+
+  "best_practices": {
+    "naming": "استخدم أسماء واضحة وموحدة (حجم كبير، حجم وسط، حجم صغير)",
+    "pricing": "ضع أسعار دقيقة مع الفواصل العشرية (5.50 بدلاً من 5)",
+    "defaults": "حدد خيار افتراضي واحد للمكونات الإلزامية",
+    "categories": "استخدم حقل type لتصنيف الإضافات (size, topping, sauce, etc)",
+    "free_options": "يمكنك وضع سعر 0 للخيارات المجانية"
+  }
+}
