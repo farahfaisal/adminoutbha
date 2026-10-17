@@ -18,11 +18,6 @@ export default function Login() {
 
   // Check for saved credentials on component mount
   useEffect(() => {
-    // For demo purposes, set default admin credentials
-    setUsername('admin');
-    setPassword('admin123');
-    setRememberMe(true);
-    
     const savedEmail = localStorage.getItem('rememberedEmail');
     const savedRememberMe = localStorage.getItem('rememberMe') === 'true';
     
@@ -70,7 +65,7 @@ export default function Login() {
       }
 
       // Login with credentials
-      await login(username, password);
+      await login(username.trim(), password);
 
       // Redirect based on role
       navigate(from);
@@ -131,6 +126,10 @@ export default function Login() {
               <input
                 id="username"
                 type="text"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                autoComplete="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:ring-red-500 focus:border-red-500 shadow-sm"

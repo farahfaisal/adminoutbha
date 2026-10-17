@@ -4,10 +4,15 @@ import { useOrderNotifications } from '../hooks/useOrderNotifications';
 import { playNotificationBeep } from '../utils/notificationSound';
 import { toast } from 'react-toastify';
 
+// Safari على الآيفون لا يوفّر Notification إلا إذا أُضيف الموقع للشاشة الرئيسية (iOS 16.4+)
+const notificationsSupported = () => typeof window !== 'undefined' && 'Notification' in window;
+
 export default function NotificationManager({ enabled = true }) {
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [permission, setPermission] = useState(Notification.permission);
+  const [permission, setPermission] = useState(
+    notificationsSupported() ? Notification.permission : 'unsupported'
+  );
 
   useEffect(() => {
     const savedSoundPref = localStorage.getItem('soundEnabled');
@@ -32,7 +37,7 @@ export default function NotificationManager({ enabled = true }) {
   }, [soundEnabled]);
 
   const showWebNotification = useCallback((data) => {
-    if (!notificationsEnabled || permission !== 'granted') return;
+    if (!notificationsEnabled || permission !== 'granted' || !notificationsSupported()) return;
 
     const title = 'طلب جديد في قائمة الانتظار!';
     const options = {
@@ -79,8 +84,11 @@ export default function NotificationManager({ enabled = true }) {
   });
 
   const requestNotificationPermission = async () => {
-    if (!('Notification' in window)) {
-      toast.error('المتصفح لا يدعم الإشعارات');
+    if (!notificationsSupported()) {
+      toast.info('لتفعيل الإشعارات على الآيفون: اضغط زر المشاركة ثم «إضافة إلى الشاشة الرئيسية» وافتح اللوحة من الأيقونة', {
+        autoClose: 10000,
+        position: 'top-center'
+      });
       return false;
     }
 

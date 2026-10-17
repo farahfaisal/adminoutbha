@@ -44,7 +44,7 @@ export default function DriverLogin() {
       }
 
       // Login with driver credentials
-      await loginDriver(username, password);
+      await loginDriver(username.trim(), password);
 
       // Redirect to driver dashboard
       navigate('/driver-dashboard');
@@ -107,6 +107,10 @@ export default function DriverLogin() {
               <input
                 id="username"
                 type="text"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                autoComplete="username"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full border rounded-md px-3 py-2"
