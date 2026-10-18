@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation, Routes, Route } from 'react-router-dom';
+import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar/Sidebar';
 import TopBar from './TopBar/TopBar';
 import Overview from './Pages/Overview';
@@ -279,7 +279,7 @@ export default function AdminDashboard() {
           />
           <main className="p-4 md:p-6 space-y-6 overflow-x-hidden pt-20 md:pt-6">
             <Routes>
-            <Route path="/" element={<Overview />} />
+            <Route path="/" element={<Navigate to="/admin-dashboard/orders" replace />} />
             <Route path="/overview" element={<Overview />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products-management" element={<ProductsManagement />} />
