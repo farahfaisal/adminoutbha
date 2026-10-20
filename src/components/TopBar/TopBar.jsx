@@ -1003,8 +1003,8 @@ export default function TopBar() {
             </div>
           </div>
 
-          {/* Mobile Logo/Title */}
-          <div className="flex md:hidden items-center">
+          {/* Mobile Logo/Title (مساحة لزر القائمة على اليمين) */}
+          <div className="flex md:hidden items-center pr-12">
             <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center text-white">
               🛒
             </div>

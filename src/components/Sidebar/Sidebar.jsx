@@ -154,7 +154,7 @@ export default function Sidebar({ activeTab, onTabChange }) {
   const navigate = useNavigate();
   const { logout } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [expandedItems, setExpandedItems] = useState({
     'orders-management': false,
     'products-management': false,
@@ -177,6 +177,24 @@ export default function Sidebar({ activeTab, onTabChange }) {
 
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  // منع تمرير الصفحة خلف القائمة وإغلاقها بزر Esc عندما تكون مفتوحة على الهاتف
+  useEffect(() => {
+    if (!isMobile || !isMobileMenuOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (e) => { if (e.key === 'Escape') setIsMobileMenuOpen(false); };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = prev;
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [isMobile, isMobileMenuOpen]);
+
+  // إغلاق القائمة عند الانتقال لحجم الكمبيوتر
+  useEffect(() => {
+    if (!isMobile) setIsMobileMenuOpen(false);
+  }, [isMobile]);
 
   const handleTabClick = (tabId) => {
     onTabChange(tabId);
@@ -204,8 +222,9 @@ export default function Sidebar({ activeTab, onTabChange }) {
       {isMobile && (
         <button
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="fixed top-4 right-4 z-50 p-3 bg-slate-900 text-white rounded-lg shadow-lg md:hidden"
+          className="fixed top-3 right-3 z-[60] p-2.5 bg-slate-800 text-white rounded-lg shadow-lg md:hidden active:scale-95 transition-transform"
           aria-label="Toggle menu"
+          aria-expanded={isMobileMenuOpen}
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             {isMobileMenuOpen ? (
@@ -232,7 +251,7 @@ export default function Sidebar({ activeTab, onTabChange }) {
         md:translate-x-0
       `}>
       {/* الهيدر */}
-      <div className="p-4 border-b border-slate-700/50 bg-gradient-to-r from-slate-900 to-slate-800">
+      <div className="p-4 pr-16 md:pr-4 border-b border-slate-700/50 bg-gradient-to-r from-slate-900 to-slate-800">
         <div className="flex items-center justify-center">
           <div className="w-10 h-10 bg-red-600 rounded-lg flex items-center justify-center text-white shadow-lg">
             🛒

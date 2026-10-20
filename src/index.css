@@ -71,11 +71,12 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Fix sticky elements on iOS */
+/* Fix sticky elements on iOS.
+   لا نستخدم transform هنا لأنه يلغي translate-x الخاص بالقائمة الجانبية فتبقى مفتوحة دائماً على الهاتف */
 .sticky,
 .fixed {
-  -webkit-transform: translateZ(0);
-  transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
 }
 
 /* Improve touch response */
