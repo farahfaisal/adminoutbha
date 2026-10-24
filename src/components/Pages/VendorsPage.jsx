@@ -10,6 +10,18 @@ import { RatingStars } from '../Rating';
 import { chargeVendorWallet } from '../../lib/walletApi';
 import { v4 as uuidv4 } from 'uuid';
 
+
+// أعمدة جدول vendors في قاعدة البيانات
+const VENDOR_COLUMNS = [
+  'store_name', 'phone', 'address', 'description', 'rating', 'rating_count', 'commission_rate',
+  'delivery_type', 'delivery_radius', 'price_per_km', 'latitude', 'longitude', 'status',
+  'logo_url', 'banner_url', 'featured_until', 'featured_order', 'auto_charge', 'wallet_enabled',
+  'service_areas', 'membership', 'min_delivery_fee', 'delivery_fee_per_km', 'featured', 'type',
+  'delivery_zones', 'email', 'estimated_delivery_time', 'working_hours', 'holidays',
+  'auto_status_change', 'timezone', 'main_service_area_id', 'global_discount_enabled',
+  'global_discount_percentage'
+];
+
 export default function VendorsPage() {
   const [vendors, setVendors] = useState([]);
   const [vendorRatings, setVendorRatings] = useState({});
@@ -455,7 +467,11 @@ export default function VendorsPage() {
       }
 
       // Remove fields that don't exist in the vendors table
-      const { categories, password, vendor_service_areas, ...cleanedFormData } = formData;
+      const { categories, password, vendor_service_areas, ...rawFormData } = formData;
+      // نرسل فقط الأعمدة الموجودة فعلاً في جدول vendors، وإلا يرفض Supabase الحفظ كاملاً
+      const cleanedFormData = Object.fromEntries(
+        Object.entries(rawFormData).filter(([key]) => VENDOR_COLUMNS.includes(key))
+      );
 
       // تحويل service_areas إلى zones لأن قاعدة البيانات لا تدعم service_areas
       if (cleanedFormData.delivery_type === 'service_areas') {

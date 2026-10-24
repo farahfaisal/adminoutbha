@@ -101,7 +101,6 @@ export default function AddVendor() {
       const vendorInsert = {
         user_id: String(userId),
         store_name: formData.store_name,
-        name: formData.store_name,
         phone: formData.phone,
         email: formData.email,
         address: formData.address,
