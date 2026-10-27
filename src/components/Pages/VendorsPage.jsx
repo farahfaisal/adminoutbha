@@ -3,6 +3,7 @@ import { toast } from 'react-toastify';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import VendorFormWizard from '../Vendors/VendorFormWizard';
+import { saveVendorType } from '../../lib/vendorType';
 import { getRatingsByType } from '../../lib/ratingsApi';
 import SearchFilter from '../SearchFilter';
 import useFilters from '../../hooks/useFilters';
@@ -489,6 +490,12 @@ export default function VendorsPage() {
 
         if (error) throw error;
 
+        // نوع المتجر (مطاعم / ماركت) — تطبيق الزبون يعرض المتاجر حسب هذا الحقل
+        if (categories && categories.length > 0) {
+          const newType = await saveVendorType(editingVendor.id, categories);
+          if (newType && data && data[0]) data[0].type = newType;
+        }
+
         // تحديث التصنيفات
         if (categories !== undefined) {
           // حذف التصنيفات القديمة
@@ -595,6 +602,11 @@ export default function VendorsPage() {
         const newVendorId = data[0].id;
 
         // حفظ التصنيفات
+        // نوع المتجر (مطاعم / ماركت) — تطبيق الزبون يعرض المتاجر حسب هذا الحقل
+        if (categories && categories.length > 0) {
+          await saveVendorType(newVendorId, categories);
+        }
+
         if (categories && categories.length > 0) {
           const categoriesData = categories.map(categoryId => ({
             vendor_id: newVendorId,

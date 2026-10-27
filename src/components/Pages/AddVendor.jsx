@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import { supabase } from '../../lib/supabase';
 import VendorFormWizard from '../Vendors/VendorFormWizard';
+import { saveVendorType } from '../../lib/vendorType';
 
 export default function AddVendor() {
   const [loading, setLoading] = useState(false);
@@ -125,19 +126,9 @@ export default function AddVendor() {
       
       const vendorId = vendorData[0].id;
 
-      // ربط البائع بالتصنيفات — vendor_categories has no category_id column;
-      // each row is a category belonging to this vendor (name, image_url, etc.)
-      // Categories from the form are top-level category IDs, which map to the
-      // vendors.category_id column instead.
+      // نوع المتجر (مطاعم / ماركت) — تطبيق الزبون يعرض المتاجر حسب هذا الحقل
       if (formData.categories && formData.categories.length > 0) {
-        const { error: catError } = await supabase
-          .from('vendors')
-          .update({ category_id: formData.categories[0] })
-          .eq('id', vendorId);
-
-        if (catError) {
-          console.error('Error linking category:', catError);
-        }
+        await saveVendorType(vendorId, formData.categories);
       }
 
       // حفظ مناطق الخدمة
