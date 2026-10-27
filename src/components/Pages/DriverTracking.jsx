@@ -90,11 +90,14 @@ export default function DriverTracking() {
           status,
           rating,
           rating_count,
-          current_latitude,
-          current_longitude,
-          last_seen_at,
+          latitude,
+          longitude,
+          last_location_update,
+          heading,
+          is_tracking,
           vehicle_type,
-          vehicle_number
+          vehicle_number,
+          service_area_id
         `);
 
       if (driversError) throw driversError;
@@ -131,15 +134,15 @@ export default function DriverTracking() {
             }
             return {
               ...driver,
-              latitude: driver.current_latitude,
-              longitude: driver.current_longitude,
-              last_location_update: driver.last_seen_at,
+              latitude: driver.latitude,
+              longitude: driver.longitude,
+              last_location_update: driver.last_location_update,
               vehicle_plate: driver.vehicle_number,
               service_area_name: driver.service_area_id ? serviceAreaMap[driver.service_area_id] || null : null,
               active_trips: tripsData || []
             };
           } catch {
-            return { ...driver, latitude: driver.current_latitude, longitude: driver.current_longitude, last_location_update: driver.last_seen_at, vehicle_plate: driver.vehicle_number, service_area_name: driver.service_area_id ? serviceAreaMap[driver.service_area_id] || null : null, active_trips: [] };
+            return { ...driver, latitude: driver.latitude, longitude: driver.longitude, last_location_update: driver.last_location_update, vehicle_plate: driver.vehicle_number, service_area_name: driver.service_area_id ? serviceAreaMap[driver.service_area_id] || null : null, active_trips: [] };
           }
         })
       );
@@ -174,7 +177,7 @@ export default function DriverTracking() {
     try {
       const { error } = await supabase
         .from('drivers')
-        .update({ status: newStatus, last_seen_at: new Date().toISOString() })
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
         .eq('id', driverId);
 
       if (error) throw error;
