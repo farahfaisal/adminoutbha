@@ -90,9 +90,16 @@ export default function Categories() {
         if (error) throw error;
         toast.success('تم تحديث التصنيف بنجاح');
       } else {
+        const slug =
+          formData.name
+            .trim()
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^\p{L}\p{N}-]/gu, '') || `category-${Date.now()}`;
+
         const { error } = await supabase
           .from('categories')
-          .insert([cleanedData]);
+          .insert([{ ...cleanedData, slug }]);
 
         if (error) throw error;
         toast.success('تم إضافة التصنيف بنجاح');
