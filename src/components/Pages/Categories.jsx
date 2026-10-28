@@ -90,12 +90,15 @@ export default function Categories() {
         if (error) throw error;
         toast.success('تم تحديث التصنيف بنجاح');
       } else {
-        const slug =
-          formData.name
-            .trim()
-            .toLowerCase()
-            .replace(/\s+/g, '-')
-            .replace(/[^\p{L}\p{N}-]/gu, '') || `category-${Date.now()}`;
+        // slug فريد دائماً: الاسم + لاحقة قصيرة، حتى لا يتعارض تصنيفان بنفس الاسم
+        // (مثلاً "مشروبات" تحت مطعمين مختلفين أو كتصنيف رئيسي)
+        const base = formData.name
+          .trim()
+          .toLowerCase()
+          .replace(/\s+/g, '-')
+          .replace(/[^\p{L}\p{N}-]/gu, '')
+          .slice(0, 60) || 'category';
+        const slug = `${base}-${Date.now().toString(36)}${Math.random().toString(36).slice(2, 5)}`;
 
         const { error } = await supabase
           .from('categories')
@@ -110,7 +113,8 @@ export default function Categories() {
       fetchCategories();
     } catch (error) {
       console.error('Error saving category:', error);
-      toast.error(formData.id ? 'فشل في تحديث التصنيف' : 'فشل في إضافة التصنيف');
+      const base = formData.id ? 'فشل في تحديث التصنيف' : 'فشل في إضافة التصنيف';
+      toast.error(error?.message ? `${base}: ${error.message}` : base);
     }
   };
 
