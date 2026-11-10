@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { supabase } from '../lib/supabase';
-import { verifyAdminPassword } from '../lib/adminUsersApi';
+import { verifyAdminPassword, getAdminUserPermissions } from '../lib/adminUsersApi';
 
 const AuthContext = createContext(null);
 
@@ -20,6 +20,14 @@ export const AuthProvider = ({ children }) => {
             const parsedUser = JSON.parse(savedUserData);
             if (parsedUser && typeof parsedUser === 'object') {
               setUser(parsedUser);
+              // تحديث الصلاحيات (قد يكون المدير الرئيسي غيّرها)
+              if (!parsedUser.isSuperAdmin && parsedUser.username) {
+                getAdminUserPermissions(parsedUser.username).then((permissions) => {
+                  const updated = { ...parsedUser, permissions };
+                  setUser(updated);
+                  try { localStorage.setItem('userData', JSON.stringify(updated)); } catch (e) { /* ignore */ }
+                });
+              }
             } else {
               localStorage.removeItem('userData');
             }
@@ -165,7 +173,9 @@ export const AuthProvider = ({ children }) => {
         email: verifyResult.email || 'admin@example.com',
         role: 'admin',
         username: verifyResult.username,
-        isSuperAdmin: false
+        isSuperAdmin: false,
+        // null = صلاحيات كاملة
+        permissions: await getAdminUserPermissions(verifyResult.username || username)
       };
 
       setUser(userData);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
+import { canAccessTab } from '../../lib/adminPermissions';
 import {
   ChartBarIcon,
   ShoppingBagIcon,
@@ -152,7 +153,11 @@ const menuItems = [
 
 export default function Sidebar({ activeTab, onTabChange }) {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  // القائمة حسب صلاحيات المدير
+  const visibleMenuItems = menuItems
+    .map((item) => (item.subItems ? { ...item, subItems: item.subItems.filter((sub) => canAccessTab(user, sub.id)) } : item))
+    .filter((item) => (item.subItems ? item.subItems.length > 0 : canAccessTab(user, item.id)));
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' && window.innerWidth < 768);
   const [expandedItems, setExpandedItems] = useState({
@@ -277,7 +282,7 @@ export default function Sidebar({ activeTab, onTabChange }) {
 
       {/* قائمة التنقل */}
       <nav className="flex-1 overflow-y-auto p-4 space-y-1.5">
-        {menuItems.map((item) => {
+        {visibleMenuItems.map((item) => {
           const Icon = item.icon;
           const isActive = activeTab === item.id || (item.subItems && item.subItems.some(sub => activeTab === sub.id));
           const isExpanded = expandedItems[item.id];

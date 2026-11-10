@@ -9,8 +9,10 @@ import {
   Eye,
   EyeOff,
   RefreshCw,
-  Shield
+  Shield,
+  Lock
 } from 'lucide-react';
+import { PERMISSION_GROUPS, hasLimitedPermissions } from '../../lib/adminPermissions';
 import { toast } from 'react-toastify';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -20,8 +22,60 @@ import {
   toggleAdminUserStatus,
   deleteAdminUser,
   generateSecurePassword,
-  checkPasswordStrengthLocal
+  checkPasswordStrengthLocal,
+  listAdminUsersPermissions,
+  setAdminUserPermissions
 } from '../../lib/adminUsersApi';
+
+/** اختيار الصلاحيات: كاملة أو أقسام محددة */
+function PermissionsPicker({ fullAccess, selected, onChange }) {
+  const toggle = (key) =>
+    onChange(false, selected.includes(key) ? selected.filter((k) => k !== key) : [...selected, key]);
+  return (
+    <div className="space-y-3">
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={() => onChange(true, selected)}
+          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border ${fullAccess ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'}`}
+        >
+          صلاحيات كاملة
+        </button>
+        <button
+          type="button"
+          onClick={() => onChange(false, selected)}
+          className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium border ${!fullAccess ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-300'}`}
+        >
+          صلاحيات محددة
+        </button>
+      </div>
+      {!fullAccess && (
+        <div className="border border-gray-200 rounded-lg p-3 max-h-64 overflow-y-auto">
+          <div className="flex justify-between text-xs mb-2">
+            <button type="button" className="text-blue-600" onClick={() => onChange(false, PERMISSION_GROUPS.map((g) => g.key))}>تحديد الكل</button>
+            <button type="button" className="text-gray-500" onClick={() => onChange(false, [])}>إلغاء الكل</button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {PERMISSION_GROUPS.map((g) => (
+              <label key={g.key} className="flex items-center gap-2 text-sm text-gray-800 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="w-4 h-4"
+                  checked={selected.includes(g.key)}
+                  onChange={() => toggle(g.key)}
+                />
+                {g.label}
+              </label>
+            ))}
+          </div>
+          {selected.length === 0 && (
+            <p className="text-xs text-red-600 mt-2">اختر قسماً واحداً على الأقل</p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function AdminUsersManagement() {
   const { user: currentUser } = useAuth();
@@ -48,6 +102,17 @@ export default function AdminUsersManagement() {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(null);
 
+  // الصلاحيات
+  const [permissionsMap, setPermissionsMap] = useState({});
+  const [newFullAccess, setNewFullAccess] = useState(true);
+  const [newPermissions, setNewPermissions] = useState([]);
+  const [permUser, setPermUser] = useState(null);
+  const [permFullAccess, setPermFullAccess] = useState(true);
+  const [permSelected, setPermSelected] = useState([]);
+  const [savingPerms, setSavingPerms] = useState(false);
+  // المدير المحدود لا يمنح صلاحيات أكثر من صلاحياته
+  const canManagePermissions = !hasLimitedPermissions(currentUser);
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -64,8 +129,9 @@ export default function AdminUsersManagement() {
   const loadUsers = async () => {
     try {
       setLoading(true);
-      const data = await listAdminUsers();
+      const [data, perms] = await Promise.all([listAdminUsers(), listAdminUsersPermissions()]);
       setUsers(data);
+      setPermissionsMap(perms);
     } catch (error) {
       console.error('Error loading users:', error);
       toast.error('فشل تحميل المستخدمين');
@@ -81,6 +147,10 @@ export default function AdminUsersManagement() {
       toast.error('يرجى ملء جميع الحقول المطلوبة');
       return;
     }
+    if (!newFullAccess && newPermissions.length === 0) {
+      toast.error('اختر قسماً واحداً على الأقل من الصلاحيات');
+      return;
+    }
 
     try {
       const result = await createAdminUser({
@@ -92,9 +162,17 @@ export default function AdminUsersManagement() {
       });
 
       if (result.success) {
+        if (!newFullAccess) {
+          const permResult = await setAdminUserPermissions(formData.username, newPermissions);
+          if (!permResult.success) {
+            toast.warning('تم إنشاء المستخدم لكن تعذّر حفظ الصلاحيات: ' + (permResult.error || ''));
+          }
+        }
         toast.success('تم إنشاء المستخدم بنجاح');
         setShowCreateModal(false);
         setFormData({ username: '', password: '', fullName: '', email: '' });
+        setNewFullAccess(true);
+        setNewPermissions([]);
         loadUsers();
       } else {
         toast.error(result.error || 'فشل إنشاء المستخدم');
@@ -159,6 +237,30 @@ export default function AdminUsersManagement() {
     } catch (error) {
       console.error('Error toggling status:', error);
       toast.error('فشل تحديث حالة المستخدم');
+    }
+  };
+
+  const openPermissions = (user) => {
+    const perms = permissionsMap[user.username];
+    setPermUser(user);
+    setPermFullAccess(!Array.isArray(perms));
+    setPermSelected(Array.isArray(perms) ? perms : []);
+  };
+
+  const handleSavePermissions = async () => {
+    if (!permFullAccess && permSelected.length === 0) {
+      toast.error('اختر قسماً واحداً على الأقل');
+      return;
+    }
+    setSavingPerms(true);
+    const result = await setAdminUserPermissions(permUser.username, permFullAccess ? null : permSelected);
+    setSavingPerms(false);
+    if (result.success) {
+      toast.success('تم حفظ الصلاحيات. تُطبَّق عند فتح المدير للوحة من جديد');
+      setPermUser(null);
+      loadUsers();
+    } else {
+      toast.error(result.error || 'فشل حفظ الصلاحيات');
     }
   };
 
@@ -240,6 +342,9 @@ export default function AdminUsersManagement() {
                   الحالة
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
+                  الصلاحيات
+                </th>
+                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
                   آخر دخول
                 </th>
                 <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">
@@ -275,12 +380,32 @@ export default function AdminUsersManagement() {
                       </span>
                     )}
                   </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm">
+                    {Array.isArray(permissionsMap[user.username]) ? (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                        محددة ({permissionsMap[user.username].length} أقسام)
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                        كاملة
+                      </span>
+                    )}
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {user.last_login
                       ? new Date(user.last_login).toLocaleString('ar-EG')
                       : 'لم يسجل دخول بعد'}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm space-x-2 space-x-reverse">
+                    {canManagePermissions && (
+                      <button
+                        onClick={() => openPermissions(user)}
+                        className="text-purple-600 hover:text-purple-800"
+                        title="الصلاحيات"
+                      >
+                        <Lock className="w-4 h-4" />
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setSelectedUser(user);
@@ -315,8 +440,8 @@ export default function AdminUsersManagement() {
       </div>
 
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
               <UserPlus className="w-6 h-6" />
               إضافة مستخدم جديد
@@ -412,6 +537,17 @@ export default function AdminUsersManagement() {
                 </div>
               )}
 
+              {canManagePermissions && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">الصلاحيات</label>
+                  <PermissionsPicker
+                    fullAccess={newFullAccess}
+                    selected={newPermissions}
+                    onChange={(full, sel) => { setNewFullAccess(full); setNewPermissions(sel); }}
+                  />
+                </div>
+              )}
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
@@ -432,6 +568,37 @@ export default function AdminUsersManagement() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {permUser && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+              <Lock className="w-5 h-5" />
+              صلاحيات {permUser.full_name || permUser.username}
+            </h2>
+            <PermissionsPicker
+              fullAccess={permFullAccess}
+              selected={permSelected}
+              onChange={(full, sel) => { setPermFullAccess(full); setPermSelected(sel); }}
+            />
+            <div className="flex gap-3 pt-5">
+              <button
+                onClick={handleSavePermissions}
+                disabled={savingPerms}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400"
+              >
+                {savingPerms ? 'جاري الحفظ...' : 'حفظ الصلاحيات'}
+              </button>
+              <button
+                onClick={() => setPermUser(null)}
+                className="flex-1 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
+              >
+                إلغاء
+              </button>
+            </div>
           </div>
         </div>
       )}

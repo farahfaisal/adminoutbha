@@ -287,3 +287,60 @@ export default {
   generateSecurePassword,
   checkPasswordStrengthLocal
 };
+
+// ===== صلاحيات المدراء =====
+// null = صلاحيات كاملة، مصفوفة = الأقسام المسموحة فقط
+
+// صلاحيات مدير واحد
+export const getAdminUserPermissions = async (username) => {
+  try {
+    const { data, error } = await supabase.rpc('get_admin_user_permissions', { p_username: username });
+    if (error) {
+      console.error('Error loading admin permissions:', error);
+      return null;
+    }
+    return Array.isArray(data) ? data : null;
+  } catch (err) {
+    console.error('Exception loading admin permissions:', err);
+    return null;
+  }
+};
+
+// صلاحيات كل المدراء { username: string[] | null }
+export const listAdminUsersPermissions = async () => {
+  try {
+    const { data, error } = await supabase.rpc('list_admin_users_permissions');
+    if (error) {
+      console.error('Error listing admin permissions:', error);
+      return {};
+    }
+    const map = {};
+    (data || []).forEach((row) => {
+      if (row.admin_username) {
+        map[row.admin_username] = Array.isArray(row.admin_permissions) ? row.admin_permissions : null;
+      }
+    });
+    return map;
+  } catch (err) {
+    console.error('Exception listing admin permissions:', err);
+    return {};
+  }
+};
+
+// حفظ صلاحيات مدير (null = صلاحيات كاملة)
+export const setAdminUserPermissions = async (username, permissions) => {
+  try {
+    const { data, error } = await supabase.rpc('set_admin_user_permissions', {
+      p_username: username,
+      p_permissions: permissions,
+    });
+    if (error) {
+      console.error('Error saving admin permissions:', error);
+      return { success: false, error: error.message };
+    }
+    return data || { success: true };
+  } catch (err) {
+    console.error('Exception saving admin permissions:', err);
+    return { success: false, error: 'فشل حفظ الصلاحيات' };
+  }
+};

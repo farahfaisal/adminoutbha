@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './Sidebar/Sidebar';
+import { useAuth } from '../contexts/AuthContext';
+import { canAccessTab, firstAllowedTab } from '../lib/adminPermissions';
 import TopBar from './TopBar/TopBar';
 import Overview from './Pages/Overview';
 import Products from './Pages/Products';
@@ -66,7 +68,13 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
   const { settings } = useSettings();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('overview');
+
+  // منع فتح صفحة غير مسموحة للمدير (حتى لو كتب الرابط مباشرة)
+  const currentTab = location.pathname.replace(/^\/admin-dashboard\/?/, '').split('/')[0];
+  const homeTab = firstAllowedTab(user) || 'orders';
+  const tabBlocked = !!currentTab && !canAccessTab(user, currentTab);
 
   const { totalPendingOrders, activateAudio, audioInitialized } = usePendingOrderNotifications({ enabled: true });
 
@@ -278,8 +286,19 @@ export default function AdminDashboard() {
             onActivate={activateAudio}
           />
           <main className="p-4 md:p-6 space-y-6 overflow-x-hidden pt-20 md:pt-6">
+            {tabBlocked ? (
+              <div className="bg-white rounded-xl shadow p-8 text-center space-y-4" dir="rtl">
+                <p className="text-lg font-bold text-gray-800">ليس لديك صلاحية لفتح هذه الصفحة</p>
+                <button
+                  onClick={() => navigate(`/admin-dashboard/${homeTab}`)}
+                  className="px-5 py-2 rounded-lg bg-blue-600 text-white"
+                >
+                  الذهاب إلى صفحة مسموحة
+                </button>
+              </div>
+            ) : (
             <Routes>
-            <Route path="/" element={<Navigate to="/admin-dashboard/orders" replace />} />
+            <Route path="/" element={<Navigate to={`/admin-dashboard/${homeTab}`} replace />} />
             <Route path="/overview" element={<Overview />} />
             <Route path="/products" element={<Products />} />
             <Route path="/products-management" element={<ProductsManagement />} />
@@ -338,6 +357,7 @@ export default function AdminDashboard() {
             <Route path="/customer-messages" element={<CustomerMessages />} />
             <Route path="*" element={<Overview />} />
           </Routes>
+            )}
         </main>
       </div>
     </div>
